@@ -172,7 +172,7 @@ public class Scanner implements Runnable, ScannerIF {
 
 		for (int i = 0; i < nodes.size(); i++) {
 			ObjectNode x = (ObjectNode) nodes.get(i);
-			int campaignid = x.get("id").asInt();
+			long campaignid = x.get("id").asLong();
 			String regions = x.get("regions").asText();
 			regions = regions.toLowerCase();
 			if (regions.contains(Configuration.getInstance().config.region.toLowerCase())) {

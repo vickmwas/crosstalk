@@ -26,7 +26,8 @@ services:
       - zookeeper
 
   zerospike:
-    image: "64.94.191.15:5000/zerospike"
+#    image: "64.94.191.15:5000/zerospike"
+    image: "jacamars/zerospike:v1"
     environment:
       BROKERLIST: "kafka:9092"
     ports:
@@ -43,7 +44,8 @@ services:
     command: bash -c "./wait-for-it.sh kafka:9092 --timeout=120 && sleep 1; ./zerospike"
 
   bidder:
-    image: "64.94.191.15:5000/bidder3"
+#    image: "64.94.191.15:5000/bidder3"
+    image: "jacamars/rtb4free:v1"
     environment:
       BROKERLIST: "kafka:9092"
       PUBSUB: "zerospike"

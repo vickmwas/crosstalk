@@ -60,7 +60,7 @@ public class GetStatusCmd extends ApiCommand {
 	public void execute() {
 		super.execute();
 	
-		if (async == null || async == false) {
+		if (async == null || !async) {
 			commandStuff();
 			return;
 		}

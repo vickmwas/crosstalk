@@ -72,7 +72,7 @@ public class ResultSetToJSON {
 
 				switch (rsmd.getColumnType(i)) {
 				case java.sql.Types.BIGINT:
-					child.put(column_name, rs.getInt(column_name));
+					child.put(column_name, rs.getLong(column_name));
 					break;
 				case java.sql.Types.BOOLEAN:
 					child.put(column_name,rs.getBoolean(column_name));

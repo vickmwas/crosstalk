@@ -1,10 +1,10 @@
  {
     "rtbName": "crosstalk",
-    "password": "$PASSWORD",
+    "password": "iamspartacus",
     "region": "$REGION",
      "zeromq": {
 		  "status": "kafka://[$BROKERLIST]&topic=status",
-          "commands":  "tcp://$PUBSUB:6000&commands",
+          "commands": "tcp://$PUBSUB:6000&commands",
           "responses": "tcp://$PUBSUB:6001&responses",
           "xfrport": "6002"
      },
@@ -12,10 +12,10 @@
  	"elk": {
  		"XsimFile": "simdata/debug.sim",
 
-		"host": "$GHOST",
-		"agghost": "$AHOST",
+		"host": "localhost",
+		"agghost": "localhost",
 
-    	"port": "9200"
+    	"port": 9200
     }, 	
 	"mysql": {
 		"login": "$JDBC"

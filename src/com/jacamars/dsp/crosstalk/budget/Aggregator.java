@@ -95,7 +95,7 @@ public class Aggregator {
 	 * @throws Exception on ELK errora.
 	 */
 	public static void main(String args[]) throws Exception {
-		String host = "52.204.44.114";
+		String host = "174.138.52.120";
 		if (args.length != 0)
 			host = args[0];
 		int port = 9200;

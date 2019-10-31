@@ -7,6 +7,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jacamars.dsp.crosstalk.tools.IABCategories;
 import com.jacamars.dsp.rtb.common.Node;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * The target object used by the AccountingCampaign object/.t
@@ -14,8 +17,11 @@ import com.jacamars.dsp.rtb.common.Node;
  *
  */
 public class Targeting {
+    /** This class's sl4j logger */
+    static final Logger logger = LoggerFactory.getLogger(Targeting.class);
 
-	public static final String NONE = "NONE";
+
+    public static final String NONE = "NONE";
 	public static final String BLACKLIST = "BLACKLIST";
 	public static final String WHITELIST = "WHITELIST";
 
@@ -23,14 +29,18 @@ public class Targeting {
 	public int targetingid;
 
 	public String domainstring = "";
-	
+
+
 	/**
 	 * Its either a listofdomains or a symbol that is al ist.
 	 */
 	public List<String> listofdomains = new ArrayList<String>();
 	public String listofdomainsSYMBOL = null;
-			
+
 	public String domaintargetting = "";
+
+	public String ip_targeting_type = "";
+	public String list_of_ips = "";
 
 	public String carrier = "";
 	public String connectionType = "";
@@ -43,10 +53,17 @@ public class Targeting {
 	public String browser = "";
 	public String country = "";
 
+//====================================================================
+//      Original
+//	public double geo_latitude = 0;
+//	public double geo_longitude = 0;
+//	public double geo_range = 0;
 
-	public double geo_latitude = 0;
-	public double geo_longitude = 0;
-	public double geo_range = 0;
+//      Modified
+    public String geo_latitude = "";
+    public String geo_longitude = "";
+    public String geo_range = "";
+//====================================================================
 
 	public List<Node> nodes = new ArrayList<Node>();
 
@@ -64,6 +81,9 @@ public class Targeting {
 
 	protected String LIST_OF_DOMAINS = "list_of_domains";
 	protected String DOMAIN_TARGETTING = "domain_targetting";
+
+	protected String IP_ADDRESSES = "list_of_ips";
+	protected String IP_TARGETING_TYPE = "ip_targeting";
 
 	protected String LIST_OF_PAGES = "listofpages";
 	protected String TRANSPARENCY = "pagetransparency";
@@ -87,7 +107,7 @@ public class Targeting {
 		if (myNode.get(LIST_OF_DOMAINS) != null) {
 			String str = myNode.get(LIST_OF_DOMAINS).asText(null);
 			if (str != null && str.trim().length()>0) {
-				
+
 				if (str.startsWith("$")) {
 					listofdomainsSYMBOL = str;
 				} else
@@ -97,10 +117,29 @@ public class Targeting {
 
 		if (myNode.get(DOMAIN_TARGETTING) != null)
 			domaintargetting = myNode.get(DOMAIN_TARGETTING).asText();
+
+		//=============================================================
+		if (myNode.get(IP_TARGETING_TYPE) != null)
+			ip_targeting_type = myNode.get(IP_TARGETING_TYPE).asText();
+
+
+		if (myNode.get(IP_ADDRESSES) != null) {
+            logger.info("IP Address Target has been found.");
+			String str = myNode.get(IP_ADDRESSES).asText(null);
+			if (str != null && str.trim().length()>0) {
+			    list_of_ips = str;
+                logger.info("IP Address From Target: {}", list_of_ips);
+			} else {
+                logger.info("IP Address From Target is NULL");
+            }
+		}
+		//=============================================================
+
+
 		carrier = myNode.get("carrier").asText();
 
 		country = myNode.get("country").asText("");
-		
+
 		os = myNode.get("os").asText("");
 
 		if (myNode.get(LIST_OF_PAGES) != null) {
@@ -114,7 +153,7 @@ public class Targeting {
 				}
 			}
 		}
-		
+
 		if (myNode.get("devicetype") != null) {
 			String test = myNode.get("devicetype").asText(null);
 			if (test != null && test.length() != 0) {
@@ -126,8 +165,15 @@ public class Targeting {
 			make = myNode.get("make").asText();
 		if (myNode.get("model") != null)
 			model = myNode.get("model").asText();
-		geo_latitude = myNode.get("geo_latitude").asDouble();
-		geo_longitude = myNode.get("geo_longitude").asDouble();
+
+//=============================================================================
+//		geo_latitude = myNode.get("geo_latitude").asDouble();
+//		geo_longitude = myNode.get("geo_longitude").asDouble();
+
+        geo_latitude = myNode.get("geo_latitude").asText();
+        geo_longitude = myNode.get("geo_longitude").asText();
+        geo_range = myNode.get("geo_range").asText();
+//=============================================================================
 
 		// connectionTYpe is needed here
 
@@ -138,8 +184,8 @@ public class Targeting {
 			IAB_category = myNode.get("IAB_category").asText();
 		if (myNode.get("IAB_category_blklist") != null)
 			IAB_category_blklst = myNode.get("IAB_category_blklist").asText();
-		
-		
+
+
 		if (myNode.get(RTB_STANDARD) != null) {
 			String rtbs =  myNode.get(RTB_STANDARD).asText();
 			getIntegerList(rtbStandardIds, rtbs);
@@ -152,7 +198,7 @@ public class Targeting {
 		} else {
 			connectionTypes.clear();
 		}
-		
+
 		nodes = compile();
 	}
 
@@ -170,7 +216,7 @@ public class Targeting {
 		}
 		List<String> temp = new ArrayList<String>();
 		temp.addAll(list);
-		
+
 		/**
 		 * Ok, I presume the user doesn't add dups, though the bidder doesn't care it will turn it into a Set anyway.
 		 */
@@ -188,7 +234,7 @@ public class Targeting {
 		delta |= list.size() != temp.size();
 		return delta;
 	}
-	
+
 	public static boolean getIntegerList(List<Integer> list, String text) {
 		boolean delta = false;
 
@@ -199,7 +245,7 @@ public class Targeting {
 			if (text.endsWith("]"))
 				text = text.substring(0,text.length()-1);
 		}
-		
+
 		if (text != null) {
 			String[] parts = text.split(",");
 			for (String part : parts) {
@@ -222,6 +268,31 @@ public class Targeting {
 		nodes = new ArrayList<Node>();
 		Node n = null;
 
+//*****************************************************************************************************
+//		if (list_of_ips != null && !list_of_ips.equals("")) {
+//
+//			boolean bl;
+//
+//			if ((bl = ip_targeting_type.equalsIgnoreCase("BLACKLIST"))) {
+//                n = new Node("ip_blacklist", "device.ip", Node.IP_COMPARE, list_of_ips);
+//                logger.info("Initializing IP Target Blacklist: {}", list_of_ips);
+//            }
+//			else if (domaintargetting.equalsIgnoreCase("WHITELIST")) {
+//                n = new Node("ip_whitelist", "device.ip", Node.IP_COMPARE, list_of_ips);
+//                logger.info("Initializing IP Target Whitelist: {}", list_of_ips);
+//            }
+//
+//			if (n != null) {
+//				if (bl)
+//					n.notPresentOk = true;
+//				else
+//					n.notPresentOk = false;
+//				nodes.add(n);
+//
+//			}
+//		}
+//*****************************************************************************************************
+
 		//
 		// Domain blacklist/whitelist Can be an actual list or a symbol
 		//
@@ -240,6 +311,9 @@ public class Targeting {
 				else
 					n.notPresentOk = false;
 				nodes.add(n);
+
+
+
 
 				if (listofpages != null && listofpages.size() != 0) {
 					boolean notPresentOk = false;
@@ -269,7 +343,7 @@ public class Targeting {
 							listofdomainsSYMBOL);
 					//n1 = new Node("whitelist", "app.domain", Node.MEMBER,
 					//		listofdomainsSYMBOL);
-					
+
 				}
 
 				if (bl)
@@ -282,7 +356,7 @@ public class Targeting {
 				//nodes.add(n1);
 			}
 		}
-		
+
 		if (devicetypes != null && devicetypes.size() != 0) {
 			List<Integer> list = new ArrayList<Integer>();
 			for (String s : devicetypes) {
@@ -414,16 +488,52 @@ public class Targeting {
 			nodes.add(n);
 		}
 
-		if (geo_latitude != 0.0 && geo_longitude != 0 && geo_range != 0) {
-			Map<String, Double> m = new HashMap<String, Double>();
-			m.put("lat", geo_latitude);
-			m.put("lon", geo_longitude);
-			m.put("range", geo_range);
-			List<Map<String, Double>> list = new ArrayList<Map<String, Double>>();
-			list.add(m);
-			n = new Node("LATLON", "device.geo", Node.INRANGE, list);
-			nodes.add(n);
+//=================================================================================
+//              Original
+//		if (geo_latitude != 0.0 && geo_longitude != 0 && geo_range != 0) {
+//			Map<String, Double> m = new HashMap<String, Double>();
+//			m.put("lat", geo_latitude);
+//			m.put("lon", geo_longitude);
+//			m.put("range", geo_range);
+//			List<Map<String, Double>> list = new ArrayList<Map<String, Double>>();
+//			list.add(m);
+//			n = new Node("LATLON", "device.geo", Node.INRANGE, list);
+//			nodes.add(n);
+//		}
+
+//-------------------    Modified   --------------------------------------------
+		logger.error("CrossTalk Checking for Location Changes");
+		if (!geo_latitude.equals("null") && !geo_longitude.equals("null") && !geo_range.equals("null")) {
+			logger.error("Geo_Latitude = {}", geo_latitude);
+			logger.error("Geo_Longitude = {}", geo_longitude);
+			logger.error("Geo_Range = {}", geo_range);
+
+			String[] latitudesArray = geo_latitude.split(",");
+			String[] longitudesArray = geo_longitude.split(",");
+			String[] rangesArray = geo_range.split(",");
+
+			logger.error("Latitudes Array Length = {}", latitudesArray.length);
+
+			List<Map<String, Double>> locationMapsList = new ArrayList<>();
+			if (latitudesArray.length != 0 && latitudesArray.length == longitudesArray.length && longitudesArray.length == rangesArray.length) {
+				int size = latitudesArray.length;
+
+				for (int i = 0; i < size; i++) {
+					Map<String, Double> locationMap = new HashMap<>();
+					locationMap.put("lat", Double.parseDouble(latitudesArray[i]));
+					locationMap.put("lon", Double.parseDouble(longitudesArray[i]));
+					locationMap.put("range", Double.parseDouble(rangesArray[i]));
+					locationMapsList.add(locationMap);
+				}
+
+				n = new Node("LATLON", "device.geo", Node.INRANGE, locationMapsList);
+				nodes.add(n);
+			}
 		}
+
+
+//=================================================================================
+
 
 		/**
 		 * Connection types
@@ -437,6 +547,43 @@ public class Targeting {
 		return nodes;
 
 	}
+
+	public void printArray(String[] array){
+		System.out.print("[");
+		for(String element : array){
+			System.out.print(element + ", ");
+		}
+		System.out.println("]");
+
+	}
+
+//    public static void main(String[] args) {
+//		String lat = "-1.274";
+//	    String latitudes = "-1.274,-1.289";
+//	    String longitudes = "36.85,36.884";
+//	    String range = "100,100";
+//
+//        String[] latitudesArray = latitudes.split(",");
+//        String[] longitudesArray = longitudes.split(",");
+//        String[] rangesArray = range.split(",");
+//
+//
+//        List<Map<String, Double>> locationMapsList = new ArrayList<>();
+//        if(latitudesArray.length == longitudesArray.length && longitudesArray.length == rangesArray.length){
+//            int size = latitudesArray.length;
+//
+//            for (int i = 0; i < size; i++){
+//                Map<String, Double> locationMap = new HashMap<>();
+//                locationMap.put("lat", Double.parseDouble(latitudesArray[i]));
+//                locationMap.put("long", Double.parseDouble(longitudesArray[i]));
+//                locationMap.put("range", Double.parseDouble(rangesArray[i]));
+//                locationMapsList.add(locationMap);
+//            }
+//        }
+//
+//        String sample = locationMapsList.get(0).get("lat").toString();
+//        System.out.println(sample);
+//    }
 
 	/**
 	 * Set the country, but fix US to USA. Strip off garbage characters like ' and "
