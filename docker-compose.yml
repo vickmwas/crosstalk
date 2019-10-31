@@ -1,6 +1,5 @@
 #
-# Contains the full stack of bidder3 (not including crosstalk, elk, mysql)
-# Does contain zookeeper and kafka.
+# Contains the full stack of bidder3 (not including elk)
 #
 
 version: "3"

@@ -17,10 +17,14 @@ RUN mkdir query
 RUN mkdir python
 RUN mkdir logs
 
+RUN apk add --no-cache libc6-compat
+COPY YourKit-JavaProfiler-2019.1-docker.zip /tmp/
+RUN unzip /tmp/YourKit-JavaProfiler-2019.1-docker.zip -d /usr/local
+RUN rm /tmp/YourKit-JavaProfiler-2019.1-docker.zip
+
 COPY log4j.properties /
 
 COPY query/daily.json    /query
-COPY query/hourly.json   /query
 COPY query/lastlog.json  /query
 COPY query/total.json   /query
 COPY target/*with-dependencies.jar /target
@@ -31,6 +35,6 @@ COPY shell/* /shell/
 COPY config.json config.json
 COPY python/* /python/
 
-EXPOSE 8100 7002
+EXPOSE 8100 7002 10001
 
-CMD ./crosstalk
+CMD ./crosstalk-yourkit

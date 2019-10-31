@@ -410,11 +410,11 @@ public class AccountingCampaign {
 			if (reason.length() != 0)
 				reason += " ";
 			if (Scanner.budgets.checkCampaignBudgetsTotal(""+campaignid, total_budget))
-				reason += "Campaign total budget exceeded. ";
+				reason += "Campaign total cost: " + cost.getDoubleValue() + " exceeds: " + total_budget.getDoubleValue() + ". ";
 			if (Scanner.budgets.checkCampaignBudgetsDaily(""+campaignid, dailyBudget))
-				reason += "Campaign daily budget exceeded. ";
+				reason += "Campaign daily cost: " + dailyCost.getDoubleValue() + " exceeded: " + dailyBudget.getDoubleValue() + ". ";
 			if (Scanner.budgets.checkCampaignBudgetsHourly(""+campaignid, hourlyBudget))
-				reason += "Campaign hourly budget exceeded. ";
+				reason += "Campaign hourly cost: " + hourlyCost.getDoubleValue() + " exceeded: " + hourlyBudget.getDoubleValue() + ". ";
 
 		}
 
@@ -688,6 +688,28 @@ public class AccountingCampaign {
 		}
 
 		return true;
+	}
+	
+	/**
+	 * Patch the campaign back into campaigns, in case zerospike is missing it.
+	 * @throws Exception on shared access errors
+	 */
+	public void patchin() throws Exception {
+		Configuration config = Configuration.getInstance();
+		List<Campaign> campaigns = config.shared.getCampaigns();
+
+		for (int i = 0; i < campaigns.size(); i++) {
+			Campaign x = campaigns.get(i);
+			if (x.adId.equals(campaign.adId)) {
+				campaigns.remove(i);
+				break;
+			}
+		}
+
+		campaigns.add(campaign);
+		Scanner.campaigns.add(this);
+
+		Configuration.getInstance().shared.putCampaigns(campaigns);
 	}
 
 	/**
